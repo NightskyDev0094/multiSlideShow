@@ -1,0 +1,163 @@
+.slide {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.imageClip {
+  width: 100%;
+  height: 100%;
+}
+
+iframe {
+  border: 0;
+}
+
+.panel {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  position: absolute;
+}
+
+.prev,
+.next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  padding: 16px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.6s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+  z-index: 100;
+}
+
+.next {
+  right: 0;
+  transform: translate(0, -50%) scale(-1, 1);
+}
+
+.prev {
+  left: 0;
+  transform: translate(0, -50%);
+}
+
+/* .prev:hover,
+.next:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+} */
+
+.dot-container {
+  position: absolute;
+  padding: 10px;
+}
+
+.dot {
+  cursor: pointer;
+  box-sizing: border-box;
+  background-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+
+.textArea {
+  position: absolute;
+  padding: 50px;
+}
+
+.left {
+  left: 0;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+
+.right {
+  right: 0;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+
+.top {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, 0%);
+}
+
+.bottom {
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 0%);
+}
+
+.center {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.topLeft {
+  left: 0;
+  top: 0;
+}
+
+.topRight {
+  right: 0;
+  top: 0;
+}
+
+.bottomLeft {
+  left: 0;
+  bottom: 0;
+}
+
+.bottomRight {
+  right: 0;
+  bottom: 0;
+}
+
+.description {
+  padding-top: 5px;
+}
+/* -------------------------------------- transition ----------------------------------------- */
+
+.transitionContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.transitionPanel {
+  width: 100%;
+  height: 100%;
+  display: block;
+  font-size: 0;
+  position: relative;
+}
+
+.transitionVerticalItem {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 70%;
+}
+
+.transitionHorizontalItem {
+  position: relative;
+  display: inline-block;
+  width: 70%;
+  height: 100%;
+}
+
+.transitionImageItem {
+  width: 100%;
+  height: 100%;
+  transform: scale(0.8);
+}
+
+/* ------------------------------------------------------------------------------------------- */

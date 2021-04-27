@@ -1,0 +1,440 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <script src="./scripts/app.js"></script>
+    <script src="./scripts/slideshow.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="./styles/app.css" />
+    <link rel="stylesheet" type="text/css" href="./styles/slideshow.css" />
+
+    <script src="https://kit.fontawesome.com/aa527429c7.js" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+    <div class="header"></div>
+    <div class="body">
+      <div class="sidebar">
+        <div class="tabbed" style="height: 100%">
+          <input type="radio" class="tabRadio" id="tab1" name="css-tabs" checked />
+          <input type="radio" class="tabRadio" id="tab2" name="css-tabs" />
+          <input type="radio" class="tabRadio" id="tab3" name="css-tabs" />
+
+          <ul class="tabs">
+            <li class="tab"><label for="tab1">Effects</label></li>
+            <li class="tab"><label for="tab2">Contents</label></li>
+            <li class="tab">
+              <label for="tab3" onclick="getSlideEffectOffect()">Options</label>
+            </li>
+          </ul>
+          <div class="tab-content">
+            <div style="overflow: auto; display: flex; flex-direction: column; align-items: center">
+              <div class="effectItem" onclick="checkSlideEffect(0)" style=" cursor: pointer" >
+                <div style="display: flex; align-items: center;">
+                  <i class="fas fa-grip-vertical fa-sm" aria-hidden="true" style="color: black"></i>
+                  <img
+                    src="https://firebasestorage.googleapis.com/v0/b/forupload-a616e.appspot.com/o/transition.png?alt=media&token=e5235907-6e2f-483b-8884-b182be218fb2" style="width: 35px; margin: 0px 10px;"
+                  ></img>
+                  <div style="color: black"><b>Transition Effect</b></div>
+                </div>
+                <i class="checkEffectIcon fas fa-check fa-sm" aria-hidden="true" style="display: none;"></i>
+              </div>
+              <div class="effectItem" onclick="checkSlideEffect(1)" style=" cursor: pointer" >
+                <div style="display: flex; align-items: center;">
+                  <i class="fas fa-grip-vertical fa-sm" aria-hidden="true" style="color: black"></i>
+                  <img
+                    src="https://firebasestorage.googleapis.com/v0/b/forupload-a616e.appspot.com/o/fade.png?alt=media&token=9420dbc8-6af3-4ef6-b83e-63c997feb361" style="width: 35px; margin: 0px 10px;"
+                  ></img>
+                  
+                  <div style="color: black"><b>Fade Effect</b></div>
+                </div>
+                <i class="checkEffectIcon fas fa-check fa-sm" aria-hidden="true" style="display: none;"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content">
+            <div class="sidebarContainer"></div>
+          </div>
+
+          <div class="tab-content">
+            <div class="effectOptions">
+              <div class="separate" style="margin-bottom: 30px">
+                <label style="margin-right: 30px">Enable Auto Slide</label>
+                <label class="switch" style="margin-right: 6px">
+                  <input id="autoPlay" type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Seconds to Display Each Slide </label>
+                <div style="display: flex">
+                  <input
+                    id="displayDuration"
+                    type="number"
+                    min="1"
+                    max="5"
+                    class="numberInput"
+                    onChange="this.value=Math.max(Math.min(this.value, 5), 1)"
+                  />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">SlideShow Direction</label>
+                <div>
+                  <input type="radio" id="slideHorizontal" name="slideDirection" value="slideHorizontal" />
+                  <label for="slideHorizontal">Horizontal</label><br />
+                  <input type="radio" id="slideVertical" name="slideDirection" value="slideHorizontal" />
+                  <label for="slideVertical">Vertical</label><br />
+                </div>
+              </div>
+              <div id="backgroundOption" style="margin-top: 30px; margin-bottom: 10px; display: flex; justify-content: space-between">
+                <h3 style="margin: 0">Background</h3>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Duration</label>
+                <div style="display: flex">
+                  <input
+                    id="backgroundDuration"
+                    type="number"
+                    min="0"
+                    max="5"
+                    class="numberInput"
+                    onChange="this.value=Math.max(Math.min(this.value, this.max), this.min)"
+                  />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Delay</label>
+                <div style="display: flex">
+                  <input
+                    id="backgroundDelay"
+                    type="number"
+                    min="0"
+                    max="5"
+                    class="numberInput"
+                    onChange="this.value=Math.max(Math.min(this.value, this.max), this.min)"
+                  />
+                </div>
+              </div>
+              <div style="margin-top: 30px; margin-bottom: 10px; display: flex; justify-content: space-between">
+                <h3 style="margin: 0">Captain</h3>
+                <label class="switch" style="margin-right: 10px">
+                  <input id="hasCaptain" type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="separate" style="flex-direction: column; align-items: start">
+                <label>Font Family</label>
+                <select style="width: 100%; margin-top: 5px" name="combobox" id="captainFontFamily" class="combobox"></select>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Font Size</label>
+                <div style="display: flex">
+                  <input
+                    id="captainFontSize"
+                    type="number"
+                    min="10"
+                    max="50"
+                    class="numberInput"
+                    onChange="this.value=Math.max(Math.min(this.value, this.max), this.min)"
+                  />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Duration</label>
+                <div style="display: flex">
+                  <input
+                    id="captainDuration"
+                    type="number"
+                    min="0"
+                    max="5"
+                    class="numberInput"
+                    onChange="this.value=Math.max(Math.min(this.value, this.max), this.min)"
+                  />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Delay</label>
+                <div style="display: flex">
+                  <input
+                    id="captainDelay"
+                    type="number"
+                    min="0"
+                    max="5"
+                    class="numberInput"
+                    onChange="this.value=Math.max(Math.min(this.value, this.max), this.min)"
+                  />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Color</label>
+                <div id="colorPicker">
+                  <input type="color" id="captainColor" />
+                </div>
+              </div>
+              <div style="margin-top: 30px; display: flex; justify-content: space-between">
+                <h3 style="margin: 0">Description</h3>
+                <label class="switch" style="margin-right: 10px">
+                  <input id="hasDescription" type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="separate" style="flex-direction: column; align-items: start">
+                <label>Font Family</label>
+                <select style="width: 100%; margin-top: 5px" name="combobox" id="descriptionFontFamily" class="combobox"></select>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Font Size</label>
+                <div style="display: flex">
+                  <input
+                    id="descritpionFontSize"
+                    type="number"
+                    min="10"
+                    max="50"
+                    class="numberInput"
+                    onChange="this.value=Math.max(Math.min(this.value, this.max), this.min)"
+                  />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Duration</label>
+                <div style="display: flex">
+                  <input
+                    id="descriptionDuration"
+                    type="number"
+                    min="0"
+                    max="5"
+                    class="numberInput"
+                    onChange="this.value=Math.max(Math.min(this.value, this.max), this.min)"
+                  />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Delay</label>
+                <div style="display: flex">
+                  <input
+                    id="descriptionDelay"
+                    type="number"
+                    min="0"
+                    max="5"
+                    class="numberInput"
+                    onChange="this.value=Math.max(Math.min(this.value, this.max), this.min)"
+                  />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Color</label>
+                <div id="colorPicker">
+                  <input type="color" id="descriptionColor" />
+                </div>
+              </div>
+
+              <div style="margin-top: 30px; margin-bottom: 10px; display: flex; justify-content: space-between">
+                <h3 style="margin: 0">Text Position</h3>
+                <select id="textPosition" style="margin-right: 10px">
+                  <option value="top">Top</option>
+                  <option value="right">Right</option>
+                  <option value="bottom">Bottom</option>
+                  <option value="left">Left</option>
+                  <option value="center">Center</option>
+                  <option value="topLeft">Top Left</option>
+                  <option value="topRight">Top Right</option>
+                  <option value="bottomLeft">Bottom Left</option>
+                  <option value="bottomRight">Bottom Right</option>
+                </select>
+              </div>
+              <div style="margin-top: 30px; margin-bottom: 10px; display: flex; justify-content: space-between">
+                <h3 style="margin: 0">Navigation</h3>
+                <label class="switch" style="margin-right: 10px">
+                  <input id="hasNavigation" type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="separate">
+                <label>Position</label>
+                <select id="navigationPosition">
+                  <option value="top">Top</option>
+                  <option value="right">Right</option>
+                  <option value="bottom">Bottom</option>
+                  <option value="left">Left</option>
+                  <option value="topLeft">Top Left</option>
+                  <option value="topRight">Top Right</option>
+                  <option value="bottomLeft">Bottom Left</option>
+                  <option value="bottomRight">Bottom Right</option>
+                </select>
+              </div>
+              <div class="separate">
+                <label>Style</label>
+                <select id="navigationType">
+                  <option value="circle">Circle</option>
+                  <option value="line">Line</option>
+                </select>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Direction</label>
+                <div>
+                  <input type="radio" id="horizontal" name="direction" value="horizontal" />
+                  <label for="horizontal">Horizontal</label><br />
+                  <input type="radio" id="vertical" name="direction" value="vertical" />
+                  <label for="vertical">Vertical</label><br />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Background Color</label>
+                <div id="colorPicker">
+                  <input type="color" id="navigationBackgroundColor" colorformat="rgba" />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Border Color</label>
+
+                <div id="colorPicker">
+                  <input type="color" id="navigationBorderColor" />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Size</label>
+              </div>
+              <div class="separate">
+                <div class="range-slider">
+                  <input
+                    id="navigationSize"
+                    class="range-slider__range"
+                    type="range"
+                    value="400"
+                    min="10"
+                    max="30"
+                    oninput="this.parentElement.children[1].innerHTML = this.value"
+                  />
+                  <span class="range-slider__value">0</span>
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Space</label>
+              </div>
+              <div class="separate">
+                <div class="range-slider">
+                  <input
+                    id="navigationSpace"
+                    class="range-slider__range"
+                    type="range"
+                    value="400"
+                    min="0"
+                    max="50"
+                    oninput="this.parentElement.children[1].innerHTML = this.value"
+                  />
+                  <span class="range-slider__value">0</span>
+                </div>
+              </div>
+              <div style="margin-top: 30px; margin-bottom: 10px; display: flex; justify-content: space-between">
+                <h3 style="margin: 0">Arrow</h3>
+                <label class="switch" style="margin-right: 10px">
+                  <input id="hasArrow" type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Arrow Color</label>
+                <div id="colorPicker">
+                  <input type="color" id="arrowColor" />
+                </div>
+              </div>
+              <div class="separate">
+                <label style="margin-right: 30px">Background Color</label>
+                <div>
+                  <div id="colorPicker">
+                    <input type="color" id="arrowBackgroundColor" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="separate">
+                <label style="margin-right: 30px">Style</label>
+              </div>
+              <div class="grid-container">
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="fas fa-angle-double-left"></i>
+                </div>
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="fas fa-arrow-left"></i>
+                </div>
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="fas fa-long-arrow-alt-left"></i>
+                </div>
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="far fa-caret-square-left"></i>
+                </div>
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="fas fa-caret-square-left"></i>
+                </div>
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="fas fa-chevron-circle-left"></i>
+                </div>
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="far fa-arrow-alt-circle-left"></i>
+                </div>
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="fas fa-caret-left"></i>
+                </div>
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="fas fa-arrow-alt-circle-left"></i>
+                </div>
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="fas fa-arrow-circle-left"></i>
+                </div>
+                <div class="grid-item" onclick="selectIcon(this)">
+                  <i class="fas fa-reply"></i>
+                </div>
+              </div>
+            </div>
+            <div id="optionFooter" style="height: 8%; background-color: #e0e6ea; position: relative">
+              <button class="btn optionBtn" onclick="setEffectOption()">Done</button>
+            </div>
+          </div>
+        </div>
+        <div class="contentOption">
+          <div class="contentOptionToolbar">
+            <div style="cursor: pointer" onclick="backToContent()">
+              <i class="fas fa-chevron-left fa-sm" style="color: blue"></i>
+              <span style="color: blue; margin: 0px 10px"><b>Back</b></span>
+            </div>
+          </div>
+          <div class="contentOptionContainer">
+            <div id="urlType">
+              <input type="radio" id="image" name="url" value="Image" checked />
+              <label for="image" style="margin-right: 30px">Image</label><br />
+              <input type="radio" id="other" name="url" value="Other" />
+              <label for="other">Other</label><br />
+            </div>
+            <hr class="solid" />
+            <div id="itemUrl">
+              <label for="">Url</label><br />
+              <input type="text" class="inputText" style="height: 25px" />
+            </div>
+            <hr class="solid" />
+            <div id="captainSetting">
+              <label>Captain</label><br />
+              <input type="text" class="inputText" style="height: 25px" /><br />
+              <label for="" style="margin-right: 10px">Font Size :</label>
+              <input type="number" class="numberInput" />
+            </div>
+            <hr class="solid" />
+            <div id="descriptionSetting">
+              <label>Description</label><br />
+              <textarea class="inputText" rows="4" style="resize: none"></textarea><br />
+              <label for="" style="margin-right: 10px">Font Size :</label>
+              <input type="number" class="numberInput" />
+            </div>
+            <button class="btn saveBtn" onclick="changeSlideShow()">Save</button>
+          </div>
+        </div>
+      </div>
+      <div class="slideShowPanel" style="padding-top: 70px">
+        <div class="slideshow-container"></div>
+      </div>
+    </div>
+  </body>
+</html>
