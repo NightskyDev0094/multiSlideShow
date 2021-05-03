@@ -6,6 +6,7 @@
     this.waitCaptainTimer = 0;
     this.perLoadItems = 10;
     this.listRange = 0;
+    this.temp = [];
 
     _multiSlideShow.setSlideShowOptions = async function (values) {
       var slides = document.querySelectorAll('.slide');
@@ -31,6 +32,7 @@
         options.captains = [];
         options.descriptions = [];
         options.fileType = [];
+        temp = []
         this.nextPage = await getYoutubeVideoList();
       }
       if (options.effectType == 'transition') createTransitionEffect();
@@ -40,7 +42,7 @@
 
     this.getYoutubeVideoList = function () {
       return new Promise((resolve, reject) => {
-        var key = 'AIzaSyDdNmXPr6_ytYBUlbLvuq3vflk7WLPM9Fs';
+        var key = 'AIzaSyBaYLqIJB_R77HYZL3zk7yrDembWskJBkc';
         var part = 'snippet';
         console.log(options.nextPage)
         var pageToken = options.nextPage;
@@ -52,18 +54,19 @@
         console.log(url)
 
         $.getJSON(url, function (data) {
+          console.log(data)
           if (data.nextPageToken) {
             options.nextPage = data.nextPageToken;
-            console.log(options.nextPage)
           }
 
           for (let i = 0; i < data.items.length; i++) {
-            options.contents.push('https://www.youtube.com/embed/' + data.items[i].id.videoId);
-            options.fileType.push('other');
+            // options.contents.push('https://www.youtube.com/embed/' + data.items[i].id.videoId);
+            temp.push('https://www.youtube.com/embed/' + data.items[i].id.videoId + '?autoplay=1')
+            options.contents.push(data.items[i].snippet.thumbnails.high.url);
+            options.fileType.push('image');
             options.captains.push('');
             options.descriptions.push('');
           }
-          console.log(data);
 
           resolve(data.nextPageToken)
         });
@@ -78,20 +81,27 @@
 
       for (let i = options.contents.length - 10; i < options.contents.length; i++) {
         var slide = document.createElement('div');
+        var playButton = document.createElement('a');
 
         slide.classList.add('slide');
-        slide.style.display="none"
-        
+        slide.style.display = "none"
+
         if (options.fileType[i] == 'image') {
           img = document.createElement('img');
         } else img = document.createElement('iframe');
         img.setAttribute('src', options.contents[i]);
         img.classList.add('imageClip');
 
+        playButton.classList.add('playButton')
+        playButton.innerHTML = '<svg height="100%" version="1.1" viewBox="0 0 68 48" width="100%"><path class="ytp-large-play-button-bg" d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#212121" style="fill-opacity: 0.8"></path><path d="M 45,24 27,14 27,34" fill="#fff"></path></svg>'
+        playButton.setAttribute('onclick', 'showVideo()');
+
         slide.appendChild(img);
+        slide.appendChild(playButton);
 
         panel.appendChild(slide);
       }
+
     }
 
     this.addStyle = function () {
@@ -159,10 +169,8 @@
         var img;
         var dot = document.createElement('span');
 
-        console.log(options.selector);
         options.selector.innerHTML = '';
 
-        console.log(options.slideDirection);
         if (options.slideDirection == 'vertical') transitionItem.classList.add('transitionVerticalItem');
         else transitionItem.classList.add('transitionHorizontalItem');
         if (i == 0) {
@@ -248,6 +256,7 @@
       panel.classList.add('panel');
 
       for (let i = 0; i < options.contents.length; i++) {
+        var playButton = document.createElement('a');
         var slide = document.createElement('div');
         var textArea = document.createElement('div');
         var captain = document.createElement('div');
@@ -271,6 +280,10 @@
         description.style.fontFamily = options.descriptionFontFamily;
         description.style.color = options.descriptionColor;
 
+        playButton.classList.add('playButton')
+        playButton.innerHTML = '<svg height="100%" version="1.1" viewBox="0 0 68 48" width="100%"><path class="ytp-large-play-button-bg" d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#212121" style="fill-opacity: 0.8"></path><path d="M 45,24 27,14 27,34" fill="#fff"></path></svg>'
+        playButton.setAttribute('onclick', 'showVideo()');
+
         var sub = '';
         for (let j = 0; j < options.descriptions[i].length; j++) {
           sub = sub + options.descriptions[i][j] + '<br />';
@@ -287,11 +300,15 @@
         textArea.appendChild(captain);
         textArea.appendChild(description);
         slide.appendChild(img);
+        slide.appendChild(playButton);
         slide.appendChild(textArea);
         dotContainer.appendChild(dot);
 
         panel.appendChild(slide);
       }
+      panel.setAttribute('onmouseenter', 'activePlayButton()');
+      panel.setAttribute('onmouseleave', 'inactivePlayButton()');
+
       options.selector.appendChild(panel);
 
       this.addButton(options.selector, prev, next, dotContainer);
@@ -302,6 +319,22 @@
     };
 
     return _multiSlideShow;
+  }
+
+  this.activePlayButton = function () {
+    var btnPath = document.querySelectorAll('.slide')[slideIndex - 1].querySelector('.playButton')?.firstChild.firstChild;
+    if(btnPath) {
+      btnPath.setAttribute('fill', 'rgb(255, 0, 0)');
+      btnPath.style.fillOpacity = 1;
+    }
+  }
+
+  this.inactivePlayButton = function () {
+    var btnPath = document.querySelectorAll('.slide')[slideIndex - 1].querySelector('.playButton')?.firstChild.firstChild;
+    if(btnPath) {
+      btnPath.setAttribute('fill', '#212121');
+      btnPath.style.fillOpacity = 0.8;
+    }
   }
 
   this.importFontFamily = function (font) {
@@ -319,7 +352,6 @@
   };
 
   this.autoPlay = function () {
-    console.log(options.autoPlay);
     if (options.autoPlay) {
       if (options.effectType == 'fade')
         this.autoPlayTimer = setInterval(() => {
@@ -351,7 +383,6 @@
     if (options.youtube && options.contents.length - slideIndex < 5) {
       addYoutubeVideoSlide();
       this.listRange += this.perLoadItems;
-      console.log('load')
     }
 
     if (options.effectType == 'transition') transitionSlide((slideIndex += n));
@@ -368,6 +399,20 @@
     autoPlay();
     if (options.effectType == 'transition') transitionSlide((slideIndex = n));
     else fadeSlide((slideIndex = n));
+  };
+
+  this.showVideo = function () {
+    console.log(temp)
+    var slide = document.querySelector('.panel').children[slideIndex - 1];
+    var iframe = document.createElement('iframe')
+
+    slide.querySelector('img').remove();
+    slide.querySelector('.playButton')?.remove();
+    iframe.setAttribute('src', temp[slideIndex - 1]);
+    iframe.setAttribute('allow', 'autoplay');
+    iframe.classList.add('imageClip');
+
+    slide.appendChild(iframe)
   };
 
   this.transitionSlide = function (n) {
@@ -545,7 +590,6 @@
     var dots = document.querySelectorAll('.dot');
 
     slideIndex = n;
-    console.log(options.contents.length)
     if (n > options.contents.length) {
       slideIndex = 1;
     }
@@ -559,13 +603,13 @@
       duration: options.backgroundDuration * 1000,
       delay: options.backgroundDelay * 1000,
     });
-    if(!options.youtube)
-    setTextEffect(slideIndex, captains, descriptions);
+    if (!options.youtube)
+      setTextEffect(slideIndex, captains, descriptions);
 
     for (i = 0; i < images.length; i++) {
       slides[i].style.display = 'none';
       images[i].style.display = 'none';
-      if(!options.youtube) {
+      if (!options.youtube) {
         captains[i].style.display = 'none';
         descriptions[i].style.display = 'none';
       }
