@@ -4,8 +4,10 @@
     var _multiSlideShow = {};
     var options;
     this.waitCaptainTimer = 0;
+    this.perLoadItems = 10;
+    this.listRange = 0;
 
-    _multiSlideShow.setSlideShowOptions = function (values) {
+    _multiSlideShow.setSlideShowOptions = async function (values) {
       var slides = document.querySelectorAll('.slide');
       var images = document.querySelectorAll('.imageClip');
       var captains = document.querySelectorAll('.captain');
@@ -21,11 +23,76 @@
       options = values;
       slideIndex = 1;
 
-      addStyle();
+      options.selector.innerHTML = '';
 
+      addStyle();
+      if (options.youtube) {
+        options.contents = [];
+        options.captains = [];
+        options.descriptions = [];
+        options.fileType = [];
+        this.nextPage = await getYoutubeVideoList();
+      }
       if (options.effectType == 'transition') createTransitionEffect();
       else createFadeEffect();
+
     };
+
+    this.getYoutubeVideoList = function () {
+      return new Promise((resolve, reject) => {
+        var key = 'AIzaSyDdNmXPr6_ytYBUlbLvuq3vflk7WLPM9Fs';
+        var part = 'snippet';
+        console.log(options.nextPage)
+        var pageToken = options.nextPage;
+        var maxResults = this.perLoadItems;
+        var channelId = options.channelId;
+        var order = options.order;
+
+        var url = 'https://youtube.googleapis.com/youtube/v3/search?part=' + part + '&key=' + key + '&pageToken=' + pageToken + '&maxResults=' + maxResults + '&channelId=' + channelId + '&order=' + order + '&type=video';
+        console.log(url)
+
+        $.getJSON(url, function (data) {
+          if (data.nextPageToken) {
+            options.nextPage = data.nextPageToken;
+            console.log(options.nextPage)
+          }
+
+          for (let i = 0; i < data.items.length; i++) {
+            options.contents.push('https://www.youtube.com/embed/' + data.items[i].id.videoId);
+            options.fileType.push('other');
+            options.captains.push('');
+            options.descriptions.push('');
+          }
+          console.log(data);
+
+          resolve(data.nextPageToken)
+        });
+
+      })
+    }
+
+    this.addYoutubeVideoSlide = async function () {
+      this.nextPage = await getYoutubeVideoList();
+      var panel = document.querySelector('.panel');
+      var img;
+
+      for (let i = options.contents.length - 10; i < options.contents.length; i++) {
+        var slide = document.createElement('div');
+
+        slide.classList.add('slide');
+        slide.style.display="none"
+        
+        if (options.fileType[i] == 'image') {
+          img = document.createElement('img');
+        } else img = document.createElement('iframe');
+        img.setAttribute('src', options.contents[i]);
+        img.classList.add('imageClip');
+
+        slide.appendChild(img);
+
+        panel.appendChild(slide);
+      }
+    }
 
     this.addStyle = function () {
       var active = document.createElement('style');
@@ -149,8 +216,10 @@
         dot.style.margin = '0px ' + options.navigationSpace + 'px';
         dot.setAttribute('onclick', 'currentSlide(' + (i + 1) + ')');
 
-        textArea.appendChild(captain);
-        textArea.appendChild(description);
+        if (options.hasCaptain)
+          textArea.appendChild(captain);
+        if (options.hasDescription)
+          textArea.appendChild(description);
         transitionItem.appendChild(transitionImageItem);
         transitionItem.appendChild(textArea);
         dotContainer.appendChild(dot);
@@ -175,7 +244,7 @@
       var dotContainer = document.createElement('div');
       var img;
 
-      options.selector.innerHTML = '';
+      // options.selector.innerHTML = '';
       panel.classList.add('panel');
 
       for (let i = 0; i < options.contents.length; i++) {
@@ -278,6 +347,13 @@
     clearTimeout(this.waitCaptainTimer);
     clearInterval(this.autoPlayTimer);
     autoPlay();
+
+    if (options.youtube && options.contents.length - slideIndex < 5) {
+      addYoutubeVideoSlide();
+      this.listRange += this.perLoadItems;
+      console.log('load')
+    }
+
     if (options.effectType == 'transition') transitionSlide((slideIndex += n));
     else fadeSlide((slideIndex += n));
   };
@@ -302,10 +378,12 @@
     var descriptions = document.querySelectorAll('.description');
     var dots = document.querySelectorAll('.dot');
 
-    for (let i = 0; i < options.captains.length; i++)
-      for (let j = 0; j < captains[i].children.length; j++) captains[i].children[j].style.opacity = '0';
+    if (options.hasCaptain)
+      for (let i = 0; i < options.captains.length; i++)
+        for (let j = 0; j < captains[i].children.length; j++) captains[i].children[j].style.opacity = '0';
 
-    for (let i = 0; i < options.descriptions.length; i++) descriptions[i].style.opacity = '0';
+    if (options.hasDescription)
+      for (let i = 0; i < options.descriptions.length; i++) descriptions[i].style.opacity = '0';
 
     slideIndex = n;
     if (n > options.contents.length) {
@@ -333,106 +411,127 @@
       item[slideIndex - 1].style.transform = 'scale(1)';
     }, 1600 + 50 * options.captains[slideIndex - 1].length);
 
-    item[beforeSlideIndex - 1].animate(
-      { transform: ['scale(1)', 'scale(0.8)'] },
-      {
-        duration: 500,
-      }
-    );
+    item[beforeSlideIndex - 1].animate({
+      transform: ['scale(1)', 'scale(0.8)']
+    }, {
+      duration: 500,
+    });
 
     if (options.slideDirection == 'vertical')
-      transitionPanel.animate(
-        { transform: ['translateY(' + -70 * (beforeSlideIndex - 1) + '%)', 'translateY(' + -70 * (slideIndex - 1) + '%)'] },
-        { duration: 500, delay: 500, easing: 'ease' }
-      );
+      transitionPanel.animate({
+        transform: ['translateY(' + -70 * (beforeSlideIndex - 1) + '%)', 'translateY(' + -70 * (slideIndex - 1) + '%)']
+      }, {
+        duration: 500,
+        delay: 500,
+        easing: 'ease'
+      });
     else
-      transitionPanel.animate(
-        { transform: ['translateX(' + -70 * (beforeSlideIndex - 1) + '%)', 'translateX(' + -70 * (slideIndex - 1) + '%)'] },
-        { duration: 500, delay: 500, easing: 'ease' }
-      );
-
-    item[slideIndex - 1].animate(
-      { transform: ['scale(0.8)', 'scale(1)'] },
-      {
+      transitionPanel.animate({
+        transform: ['translateX(' + -70 * (beforeSlideIndex - 1) + '%)', 'translateX(' + -70 * (slideIndex - 1) + '%)']
+      }, {
         duration: 500,
-        delay: 1500 + 50 * options.captains[slideIndex - 1].length,
+        delay: 500,
+        easing: 'ease'
+      });
+
+    item[slideIndex - 1].animate({
+      transform: ['scale(0.8)', 'scale(1)']
+    }, {
+      duration: 500,
+      delay: 1500 + 50 * options.captains[slideIndex - 1].length,
+    });
+
+    if (options.hasCaptain) {
+
+      // Text Effect
+      var words = captains[this.beforeSlideIndex - 1].children;
+      var beforeWords = captains[slideIndex - 1].children;
+
+      //captain when it is disappeaer
+      for (let i = 0; i < words.length; i++) {
+        words[i].style.opacity = 0;
       }
-    );
 
-    // Text Effect
-    var words = captains[this.beforeSlideIndex - 1].children;
-    var beforeWords = captains[slideIndex - 1].children;
-
-    //captain when it is disappeaer
-    for (let i = 0; i < words.length; i++) {
-      words[i].style.opacity = 0;
-    }
-
-    for (let i = 0; i < words.length; i++) {
-      words[i].animate(
-        { opacity: [1, 0] },
-        {
+      for (let i = 0; i < words.length; i++) {
+        words[i].animate({
+          opacity: [1, 0]
+        }, {
           duration: 500,
-        }
-      );
+        });
+      }
+
+      //captain when it is appeaer
+      for (let i = 0; i < beforeWords.length; i++) {
+        beforeWords[i].style.transformOrigin = 'left top';
+        setTimeout(() => {
+          beforeWords[i].style.opacity = 1;
+          beforeWords[i].style.transform = 'rotateX(0deg) scale(1)';
+        }, 1090 + 50 * i);
+      }
+
+      for (let i = 0; i < beforeWords.length; i++) {
+        beforeWords[i].animate(
+          [{
+              opacity: 0,
+              transform: 'rotateX(360deg) scale(0)'
+            },
+            {
+              opacity: 1,
+              transform: 'rotateX(0deg) scale(1)'
+            },
+          ], {
+            duration: 500,
+            delay: 1000 + 50 * i,
+          }
+        );
+      }
     }
 
-    //captain when it is appeaer
-    for (let i = 0; i < beforeWords.length; i++) {
-      beforeWords[i].style.transformOrigin = 'left top';
+    if (options.hasDescription) {
+      //description when it is disappeaer
+
       setTimeout(() => {
-        beforeWords[i].style.opacity = 1;
-        beforeWords[i].style.transform = 'rotateX(0deg) scale(1)';
-      }, 1090 + 50 * i);
-    }
+        descriptions[this.beforeSlideIndex - 1].style.opacity = 0;
+        descriptions[this.beforeSlideIndex - 1].style.transform = 'translate(0, 100%)';
+        // descriptions[this.beforeSlideIndex - 1].style.display = 'block';
+      }, 600);
 
-    for (let i = 0; i < beforeWords.length; i++) {
-      beforeWords[i].animate(
-        [
-          { opacity: 0, transform: 'rotateX(360deg) scale(0)' },
-          { opacity: 1, transform: 'rotateX(0deg) scale(1)' },
-        ],
-        {
+      descriptions[this.beforeSlideIndex - 1].animate(
+        [{
+            transform: 'none',
+            opacity: 1
+          },
+          {
+            transform: 'translate(0, 100%)',
+            opacity: 0
+          },
+        ], {
           duration: 500,
-          delay: 1000 + 50 * i,
+        }
+      );
+
+      //description when it is appear
+      setTimeout(() => {
+        descriptions[slideIndex - 1].style.opacity = 1;
+        descriptions[slideIndex - 1].style.transform = 'none';
+      }, 1500);
+
+      descriptions[slideIndex - 1].animate(
+        [{
+            transform: 'translate(0, 100%)',
+            opacity: 0
+          },
+          {
+            transform: 'none',
+            opacity: 1
+          },
+        ], {
+          duration: 500,
+          delay: 1000,
         }
       );
     }
 
-    //description when it is disappeaer
-
-    setTimeout(() => {
-      descriptions[this.beforeSlideIndex - 1].style.opacity = 0;
-      descriptions[this.beforeSlideIndex - 1].style.transform = 'translate(0, 100%)';
-      // descriptions[this.beforeSlideIndex - 1].style.display = 'block';
-    }, 600);
-
-    descriptions[this.beforeSlideIndex - 1].animate(
-      [
-        { transform: 'none', opacity: 1 },
-        { transform: 'translate(0, 100%)', opacity: 0 },
-      ],
-      {
-        duration: 500,
-      }
-    );
-
-    //description when it is appear
-    setTimeout(() => {
-      descriptions[slideIndex - 1].style.opacity = 1;
-      descriptions[slideIndex - 1].style.transform = 'none';
-    }, 1500);
-
-    descriptions[slideIndex - 1].animate(
-      [
-        { transform: 'translate(0, 100%)', opacity: 0 },
-        { transform: 'none', opacity: 1 },
-      ],
-      {
-        duration: 500,
-        delay: 1000,
-      }
-    );
     if (options.hasNavigation) dots[slideIndex - 1].className += ' active';
   };
 
@@ -446,6 +545,7 @@
     var dots = document.querySelectorAll('.dot');
 
     slideIndex = n;
+    console.log(options.contents.length)
     if (n > options.contents.length) {
       slideIndex = 1;
     }
@@ -453,20 +553,22 @@
       slideIndex = images.length;
     }
 
-    images[slideIndex - 1].animate(
-      { opacity: [0.4, 1] },
-      {
-        duration: options.backgroundDuration * 1000,
-        delay: options.backgroundDelay * 1000,
-      }
-    );
+    images[slideIndex - 1].animate({
+      opacity: [0.4, 1]
+    }, {
+      duration: options.backgroundDuration * 1000,
+      delay: options.backgroundDelay * 1000,
+    });
+    if(!options.youtube)
     setTextEffect(slideIndex, captains, descriptions);
 
     for (i = 0; i < images.length; i++) {
       slides[i].style.display = 'none';
       images[i].style.display = 'none';
-      captains[i].style.display = 'none';
-      descriptions[i].style.display = 'none';
+      if(!options.youtube) {
+        captains[i].style.display = 'none';
+        descriptions[i].style.display = 'none';
+      }
     }
 
     if (options.hasNavigation)
@@ -503,32 +605,42 @@
   };
 
   this.setTextEffect = function (slideIndex, captains, descriptions) {
-    captains[slideIndex - 1].animate(
-      { opacity: [0, 1] },
-      {
-        duration: options.captainDuration * 1000,
-        delay: options.captainDelay * 1000,
-      }
-    );
+    captains[slideIndex - 1].animate({
+      opacity: [0, 1]
+    }, {
+      duration: options.captainDuration * 1000,
+      delay: options.captainDelay * 1000,
+    });
 
     if (options.textPosition.toLowerCase().includes('left')) {
-      descriptions[slideIndex - 1].animate([{ transform: 'translate(-200%, 0)' }, { transform: 'translate(-100%, 0)' }, { transform: 'none' }], {
+      descriptions[slideIndex - 1].animate([{
+        transform: 'translate(-200%, 0)'
+      }, {
+        transform: 'translate(-100%, 0)'
+      }, {
+        transform: 'none'
+      }], {
         duration: options.descriptionDuration * 1000,
         delay: options.descriptionDelay * 1000,
       });
     } else if (options.textPosition.toLowerCase().includes('right')) {
-      descriptions[slideIndex - 1].animate([{ transform: 'translate(200%, 0)' }, { transform: 'translate(100%, 0)' }, { transform: 'none' }], {
+      descriptions[slideIndex - 1].animate([{
+        transform: 'translate(200%, 0)'
+      }, {
+        transform: 'translate(100%, 0)'
+      }, {
+        transform: 'none'
+      }], {
         duration: options.descriptionDuration * 1000,
         delay: options.descriptionDelay * 1000,
       });
     } else {
-      descriptions[slideIndex - 1].animate(
-        { opacity: [0, 1] },
-        {
-          duration: options.descriptionDuration * 1000,
-          delay: options.captainDuration * 1000 + options.captainDelay * 1000,
-        }
-      );
+      descriptions[slideIndex - 1].animate({
+        opacity: [0, 1]
+      }, {
+        duration: options.descriptionDuration * 1000,
+        delay: options.captainDuration * 1000 + options.captainDelay * 1000,
+      });
     }
   };
 
