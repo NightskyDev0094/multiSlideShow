@@ -1,7 +1,7 @@
 // Param
 var options = {
   selector: '',
-  effectType: 'transition',
+  effectType: 'fade',
   contents: [
     'https://images.unsplash.com/photo-1538991383142-36c4edeaffde?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1351&q=80',
     'https://www.youtube.com/embed/WDH_nJM3djc',
@@ -48,13 +48,18 @@ var options = {
   navigationDirection: 'horizontal',
   navigationSize: 15,
   navigationSpace: 2,
-  hasCaptain: true,
-  hasDescription: true,
-  hasNavigation: true,
+  hasCaptain: false,
+  hasDescription: false,
+  hasNavigation: false,
   hasArrow: true,
   arrowColor: '#ffffff',
   arrowBackgroundColor: '#000000',
   arrowIcon: '<i class="fas fa-chevron-left" aria-hidden="true"></i>',
+
+  youtube: true,
+  channelId: 'UCFks_UAxc9zdWHAE75eWDDA',
+  order: 'viewCount',
+  nextPage: ''
 };
 
 var slideIndex = 1;
@@ -72,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
     document.querySelector('.slideshow-container').style.height = '500px';
   }
   document.querySelector('.effectItem').querySelector('.checkEffectIcon').style.display = 'block';
+  document.querySelector('.channelId').value = options.channelId;
   createContentList();
 
   var json = $.getJSON('https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyBwIX97bVWr3-6AIUvGkcNnmFgirefZ6Sw', function (data) {
@@ -79,7 +85,14 @@ document.addEventListener('DOMContentLoaded', function (e) {
       $('.combobox').append($('<option></option>').attr('value', font.family).text(font.family));
     });
   });
+
 });
+
+function sortYoutube() {
+  options.channelId = document.querySelector('.channelId').value;
+  options.order = document.querySelector('#youtubeOrder').value
+  myWindowGlobalLibraryName.setSlideShowOptions(options);
+}
 
 function checkSlideEffect(n) {
   var effects = document.querySelectorAll('.checkEffectIcon');
@@ -106,14 +119,15 @@ function transitionEffect() {
   setTimeout(() => {
     document.querySelectorAll('.transitionImageItem')[1].style.transform = 'scale(1)';
   }, 1100);
-  document.querySelector('.transitionPanel').animate({ transform: ['translateX(0px)', 'translateX(-60%)'] }, 1000);
-  document.querySelectorAll('.transitionImageItem')[1].animate(
-    { transform: ['scale(0.8)', 'scale(1)'] },
-    {
-      duration: 1000,
-      delay: 1000,
-    }
-  );
+  document.querySelector('.transitionPanel').animate({
+    transform: ['translateX(0px)', 'translateX(-60%)']
+  }, 1000);
+  document.querySelectorAll('.transitionImageItem')[1].animate({
+    transform: ['scale(0.8)', 'scale(1)']
+  }, {
+    duration: 1000,
+    delay: 1000,
+  });
 }
 
 function createContentList() {
@@ -236,6 +250,7 @@ function deleteSlide(i) {
   myWindowGlobalLibraryName.setSlideShowOptions(options);
   createContentList();
 }
+
 function addSlide() {
   options.contents.push(document.querySelector('#itemUrl').querySelector('input').value);
   options.captains.push(document.querySelector('#captainSetting').querySelector('input').value);
