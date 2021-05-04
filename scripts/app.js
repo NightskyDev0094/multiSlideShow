@@ -59,7 +59,6 @@ var options = {
   youtube: true,
   channelId: 'UCFks_UAxc9zdWHAE75eWDDA',
   order: 'viewCount',
-  nextPage: ''
 };
 
 var slideIndex = 1;
@@ -76,8 +75,11 @@ document.addEventListener('DOMContentLoaded', function (e) {
     document.querySelector('.slideshow-container').style.width = '900px';
     document.querySelector('.slideshow-container').style.height = '500px';
   }
-  document.querySelector('.effectItem').querySelector('.checkEffectIcon').style.display = 'block';
   document.querySelector('.channelId').value = options.channelId;
+
+  if(options.effectType == 'transition') document.querySelectorAll('.checkEffectIcon')[0].style.display = 'block';
+  else document.querySelectorAll('.checkEffectIcon')[1].style.display = 'block';
+
   createContentList();
 
   var json = $.getJSON('https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyBwIX97bVWr3-6AIUvGkcNnmFgirefZ6Sw', function (data) {
@@ -324,7 +326,7 @@ function getSlideEffectOffect() {
   document.querySelector('#navigationSize').parentElement.children[1].innerHTML = options.navigationSize;
   document.querySelector('#navigationSpace').value = options.navigationSpace;
   document.querySelector('#navigationSpace').parentElement.children[1].innerHTML = options.navigationSpace;
-  document.querySelector('#hasNavigation').value = options.hasNavigation;
+  document.querySelector('#hasNavigation').checked = options.hasNavigation;
   document.querySelector('#hasArrow').value = options.hasArrow;
   document.querySelector('#arrowColor').value = options.arrowColor;
   document.querySelector('#arrowBackgroundColor').value = options.arrowBackgroundColor;

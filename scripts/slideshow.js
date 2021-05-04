@@ -32,77 +32,14 @@
         options.captains = [];
         options.descriptions = [];
         options.fileType = [];
-        temp = []
-        this.nextPage = await getYoutubeVideoList();
+        temp = [];
+        nextPage = '';
+        await getYoutubeVideoList();
       }
       if (options.effectType == 'transition') createTransitionEffect();
       else createFadeEffect();
 
     };
-
-    this.getYoutubeVideoList = function () {
-      return new Promise((resolve, reject) => {
-        var key = 'AIzaSyBaYLqIJB_R77HYZL3zk7yrDembWskJBkc';
-        var part = 'snippet';
-        console.log(options.nextPage)
-        var pageToken = options.nextPage;
-        var maxResults = this.perLoadItems;
-        var channelId = options.channelId;
-        var order = options.order;
-
-        var url = 'https://youtube.googleapis.com/youtube/v3/search?part=' + part + '&key=' + key + '&pageToken=' + pageToken + '&maxResults=' + maxResults + '&channelId=' + channelId + '&order=' + order + '&type=video';
-        console.log(url)
-
-        $.getJSON(url, function (data) {
-          console.log(data)
-          if (data.nextPageToken) {
-            options.nextPage = data.nextPageToken;
-          }
-
-          for (let i = 0; i < data.items.length; i++) {
-            // options.contents.push('https://www.youtube.com/embed/' + data.items[i].id.videoId);
-            temp.push('https://www.youtube.com/embed/' + data.items[i].id.videoId + '?autoplay=1')
-            options.contents.push(data.items[i].snippet.thumbnails.high.url);
-            options.fileType.push('image');
-            options.captains.push('');
-            options.descriptions.push('');
-          }
-
-          resolve(data.nextPageToken)
-        });
-
-      })
-    }
-
-    this.addYoutubeVideoSlide = async function () {
-      this.nextPage = await getYoutubeVideoList();
-      var panel = document.querySelector('.panel');
-      var img;
-
-      for (let i = options.contents.length - 10; i < options.contents.length; i++) {
-        var slide = document.createElement('div');
-        var playButton = document.createElement('a');
-
-        slide.classList.add('slide');
-        slide.style.display = "none"
-
-        if (options.fileType[i] == 'image') {
-          img = document.createElement('img');
-        } else img = document.createElement('iframe');
-        img.setAttribute('src', options.contents[i]);
-        img.classList.add('imageClip');
-
-        playButton.classList.add('playButton')
-        playButton.innerHTML = '<svg height="100%" version="1.1" viewBox="0 0 68 48" width="100%"><path class="ytp-large-play-button-bg" d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#212121" style="fill-opacity: 0.8"></path><path d="M 45,24 27,14 27,34" fill="#fff"></path></svg>'
-        playButton.setAttribute('onclick', 'showVideo()');
-
-        slide.appendChild(img);
-        slide.appendChild(playButton);
-
-        panel.appendChild(slide);
-      }
-
-    }
 
     this.addStyle = function () {
       var active = document.createElement('style');
@@ -145,6 +82,7 @@
       if (options.hasNavigation) slideShow.appendChild(dotContainer);
     };
 
+    // make every slide and then append to transition slide panel
     this.createTransitionEffect = function () {
       console.log('transition');
       var transitionContainer = document.createElement('div');
@@ -166,10 +104,9 @@
         var textArea = document.createElement('div');
         var captain = document.createElement('div');
         var description = document.createElement('div');
+        var playButton = document.createElement('a');
         var img;
         var dot = document.createElement('span');
-
-        options.selector.innerHTML = '';
 
         if (options.slideDirection == 'vertical') transitionItem.classList.add('transitionVerticalItem');
         else transitionItem.classList.add('transitionHorizontalItem');
@@ -217,6 +154,10 @@
         }
         description.innerHTML = sub;
 
+        playButton.classList.add('playButton')
+        playButton.innerHTML = '<svg height="100%" version="1.1" viewBox="0 0 68 48" width="100%"><path class="ytp-large-play-button-bg" d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#212121" style="fill-opacity: 0.8"></path><path d="M 45,24 27,14 27,34" fill="#fff"></path></svg>'
+        playButton.setAttribute('onclick', 'showVideo()');
+
         dot.classList.add('dot');
         dot.style.border = '2px solid ' + options.navigationBorderColor;
         dot.style.width = options.navigationSize + 'px';
@@ -229,11 +170,15 @@
         if (options.hasDescription)
           textArea.appendChild(description);
         transitionItem.appendChild(transitionImageItem);
+        transitionItem.appendChild(playButton);
         transitionItem.appendChild(textArea);
         dotContainer.appendChild(dot);
 
         transitionPanel.appendChild(transitionItem);
       }
+      transitionPanel.setAttribute('onmouseenter', 'activePlayButton()');
+      transitionPanel.setAttribute('onmouseleave', 'inactivePlayButton()');
+
       transitionContainer.appendChild(transitionPanel);
       options.selector.appendChild(transitionContainer);
 
@@ -244,6 +189,7 @@
       autoPlay();
     };
 
+    // make every slide and then append to fade slide panel
     this.createFadeEffect = function () {
       console.log('createFadeEffect');
       var panel = document.createElement('div');
@@ -321,100 +267,7 @@
     return _multiSlideShow;
   }
 
-  this.activePlayButton = function () {
-    var btnPath = document.querySelectorAll('.slide')[slideIndex - 1].querySelector('.playButton')?.firstChild.firstChild;
-    if(btnPath) {
-      btnPath.setAttribute('fill', 'rgb(255, 0, 0)');
-      btnPath.style.fillOpacity = 1;
-    }
-  }
-
-  this.inactivePlayButton = function () {
-    var btnPath = document.querySelectorAll('.slide')[slideIndex - 1].querySelector('.playButton')?.firstChild.firstChild;
-    if(btnPath) {
-      btnPath.setAttribute('fill', '#212121');
-      btnPath.style.fillOpacity = 0.8;
-    }
-  }
-
-  this.importFontFamily = function (font) {
-    var fontFamily = font;
-    var fontUrl = `https://fonts.googleapis.com/css?family=${fontFamily.replace(' ', '+')}`;
-    var pos = fontFamily.indexOf(':');
-    if (pos > 0) {
-      fontFamily = fontFamily.substring(0, pos);
-    }
-    var link = document.createElement('link');
-    link.id = 'myfontlink';
-    link.setAttribute('rel', 'stylesheet');
-    link.setAttribute('href', fontUrl);
-    document.head.appendChild(link);
-  };
-
-  this.autoPlay = function () {
-    if (options.autoPlay) {
-      if (options.effectType == 'fade')
-        this.autoPlayTimer = setInterval(() => {
-          fadeSlide((slideIndex += 1));
-        }, options.displayDuration * 1000);
-      else
-        this.autoPlayTimer = setInterval(() => {
-          this.beforeSlideIndex = slideIndex;
-          transitionSlide((slideIndex += 1));
-        }, 3000 + 50 * options.captains[slideIndex - 1].length);
-    } else {
-      clearInterval(this.autoPlayTimer);
-    }
-  };
-
-  this.killTimer = function () {
-    clearInterval(this.autoPlayTimer);
-  };
-
-  // Click prev or push
-  this.plusSlides = function (n) {
-    this.beforeSlideIndex = slideIndex;
-    clearTimeout(this.capainTimer);
-    clearTimeout(this.descriptionTimer);
-    clearTimeout(this.waitCaptainTimer);
-    clearInterval(this.autoPlayTimer);
-    autoPlay();
-
-    if (options.youtube && options.contents.length - slideIndex < 5) {
-      addYoutubeVideoSlide();
-      this.listRange += this.perLoadItems;
-    }
-
-    if (options.effectType == 'transition') transitionSlide((slideIndex += n));
-    else fadeSlide((slideIndex += n));
-  };
-
-  // Click bottom button
-  this.currentSlide = function (n) {
-    this.beforeSlideIndex = slideIndex;
-    clearTimeout(this.capainTimer);
-    clearTimeout(this.descriptionTimer);
-    clearTimeout(this.waitCaptainTimer);
-    clearInterval(this.autoPlayTimer);
-    autoPlay();
-    if (options.effectType == 'transition') transitionSlide((slideIndex = n));
-    else fadeSlide((slideIndex = n));
-  };
-
-  this.showVideo = function () {
-    console.log(temp)
-    var slide = document.querySelector('.panel').children[slideIndex - 1];
-    var iframe = document.createElement('iframe')
-
-    slide.querySelector('img').remove();
-    slide.querySelector('.playButton')?.remove();
-    iframe.setAttribute('src', temp[slideIndex - 1]);
-    iframe.setAttribute('allow', 'autoplay');
-    iframe.classList.add('imageClip');
-
-    slide.appendChild(iframe)
-  };
-
+  // transition animation
   this.transitionSlide = function (n) {
     var i;
     var transitionPanel = document.querySelector('.transitionPanel');
@@ -648,6 +501,7 @@
     if (options.hasNavigation) dots[slideIndex - 1].className += ' active';
   };
 
+  // effect to the captain and description
   this.setTextEffect = function (slideIndex, captains, descriptions) {
     captains[slideIndex - 1].animate({
       opacity: [0, 1]
@@ -686,6 +540,233 @@
         delay: options.captainDuration * 1000 + options.captainDelay * 1000,
       });
     }
+  };
+
+  // get the info of the youtube channel ( 10 times everytime )
+  this.getYoutubeVideoList = function () {
+    return new Promise((resolve, reject) => {
+      var key = 'AIzaSyAatNKZJw7ty6iRK9kUDOXX8iO5_x_aePs';
+      var part = 'snippet';
+      var pageToken = nextPage;
+      var maxResults = this.perLoadItems;
+      var channelId = options.channelId;
+      var order = options.order;
+
+      var url = 'https://youtube.googleapis.com/youtube/v3/search?part=' + part + '&key=' + key + '&pageToken=' + pageToken + '&maxResults=' + maxResults + '&channelId=' + channelId + '&order=' + order + '&type=video';
+      console.log(url)
+
+      $.getJSON(url, function (data) {
+        console.log(data)
+        if (data.nextPageToken) {
+          nextPage = data.nextPageToken;
+        }
+
+        for (let i = 0; i < data.items.length; i++) {
+          temp.push('https://www.youtube.com/embed/' + data.items[i].id.videoId + '?autoplay=1')
+          options.contents.push(data.items[i].snippet.thumbnails.high.url);
+          options.fileType.push('image');
+          options.captains.push('');
+          options.descriptions.push('');
+        }
+
+        resolve(data.nextPageToken)
+      });
+
+    })
+  }
+
+  // append 10 items to slide every time 
+  this.addYoutubeVideoSlide = async function () {
+    await getYoutubeVideoList();
+
+    if (options.effectType == 'fade') {
+      var img;
+      var panel = document.querySelector('.panel');
+
+      for (let i = options.contents.length - 10; i < options.contents.length; i++) {
+        var slide = document.createElement('div');
+        var playButton = document.createElement('a');
+
+        slide.classList.add('slide');
+        slide.style.display = "none"
+
+        if (options.fileType[i] == 'image') {
+          img = document.createElement('img');
+        } else img = document.createElement('iframe');
+        img.setAttribute('src', options.contents[i]);
+        img.classList.add('imageClip');
+
+        playButton.classList.add('playButton')
+        playButton.innerHTML = '<svg height="100%" version="1.1" viewBox="0 0 68 48" width="100%"><path class="ytp-large-play-button-bg" d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#212121" style="fill-opacity: 0.8"></path><path d="M 45,24 27,14 27,34" fill="#fff"></path></svg>'
+        playButton.setAttribute('onclick', 'showVideo()');
+
+        slide.appendChild(img);
+        slide.appendChild(playButton);
+
+        panel.appendChild(slide);
+      }
+    } else {
+      var transitionPanel = document.querySelector('.transitionPanel');
+      transitionPanel.lastChild.style.marginRight = 0;
+
+      for (let i = options.contents.length - 10; i < options.contents.length; i++) {
+        var transitionItem = document.createElement('div');
+        var transitionImageItem = document.createElement('div');
+        var playButton = document.createElement('a');
+        var img;
+
+        if (options.slideDirection == 'vertical') transitionItem.classList.add('transitionVerticalItem');
+        else transitionItem.classList.add('transitionHorizontalItem');
+        if (i == 0) {
+          if (options.slideDirection == 'horizontal') transitionItem.style.marginLeft = '15%';
+          else transitionItem.style.marginTop = '15%';
+        }
+        if (i == options.contents.length - 1) {
+          if (options.slideDirection == 'horizontal') transitionItem.style.marginRight = '15%';
+          else transitionItem.style.marginBottom = '15%';
+        }
+        transitionImageItem.classList.add('transitionImageItem');
+
+        if (options.fileType[i] == 'image') {
+          img = document.createElement('img');
+        } else img = document.createElement('iframe');
+        img.setAttribute('src', options.contents[i]);
+        img.classList.add('imageClip');
+
+        playButton.classList.add('playButton')
+        playButton.innerHTML = '<svg height="100%" version="1.1" viewBox="0 0 68 48" width="100%"><path class="ytp-large-play-button-bg" d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" fill="#212121" style="fill-opacity: 0.8"></path><path d="M 45,24 27,14 27,34" fill="#fff"></path></svg>'
+        playButton.setAttribute('onclick', 'showVideo()');
+
+        transitionImageItem.appendChild(img);
+        transitionItem.appendChild(transitionImageItem);
+        transitionItem.appendChild(playButton);
+        transitionPanel.appendChild(transitionItem);
+      }
+    }
+
+
+    // Click prev or push
+    this.plusSlides = function (n) {
+      this.beforeSlideIndex = slideIndex;
+      clearTimeout(this.capainTimer);
+      clearTimeout(this.descriptionTimer);
+      clearTimeout(this.waitCaptainTimer);
+      clearInterval(this.autoPlayTimer);
+      autoPlay();
+
+      if (options.youtube && options.contents.length - slideIndex < 5) {
+        addYoutubeVideoSlide();
+        this.listRange += this.perLoadItems;
+      }
+
+      if (options.effectType == 'transition') transitionSlide((slideIndex += n));
+      else fadeSlide((slideIndex += n));
+    };
+
+    // Click bottom button
+    this.currentSlide = function (n) {
+      this.beforeSlideIndex = slideIndex;
+      clearTimeout(this.capainTimer);
+      clearTimeout(this.descriptionTimer);
+      clearTimeout(this.waitCaptainTimer);
+      clearInterval(this.autoPlayTimer);
+      autoPlay();
+      if (options.effectType == 'transition') transitionSlide((slideIndex = n));
+      else fadeSlide((slideIndex = n));
+    };
+
+    // When youtube thumbnail is clicked, it will be shown as video.
+    this.showVideo = function () {
+      console.log(temp)
+      var slide;
+      var iframe = document.createElement('iframe')
+
+      if (options.effectType == 'fade')
+        slide = document.querySelector('.panel').children[slideIndex - 1];
+      else {
+        slide = document.querySelector('.transitionPanel').children[slideIndex - 1];
+      }
+
+      iframe.setAttribute('src', temp[slideIndex - 1]);
+      iframe.setAttribute('allow', 'autoplay');
+      iframe.classList.add('imageClip');
+      slide.querySelector('img').parentElement.appendChild(iframe);
+
+      slide.querySelector('img').remove();
+      slide.querySelector('.playButton')?.remove();
+
+    };
+  }
+
+  
+  // get google font family
+  this.importFontFamily = function (font) {
+    var fontFamily = font;
+    var fontUrl = `https://fonts.googleapis.com/css?family=${fontFamily.replace(' ', '+')}`;
+    var pos = fontFamily.indexOf(':');
+    if (pos > 0) {
+      fontFamily = fontFamily.substring(0, pos);
+    }
+    var link = document.createElement('link');
+    link.id = 'myfontlink';
+    link.setAttribute('rel', 'stylesheet');
+    link.setAttribute('href', fontUrl);
+    document.head.appendChild(link);
+  };
+
+  // slide auto play
+  this.autoPlay = function () {
+    if (options.autoPlay) {
+      if (options.effectType == 'fade')
+        this.autoPlayTimer = setInterval(() => {
+          fadeSlide((slideIndex += 1));
+        }, options.displayDuration * 1000);
+      else
+        this.autoPlayTimer = setInterval(() => {
+          this.beforeSlideIndex = slideIndex;
+          transitionSlide((slideIndex += 1));
+        }, 3000 + 50 * options.captains[slideIndex - 1].length);
+    } else {
+      clearInterval(this.autoPlayTimer);
+    }
+  };
+
+  // active to play button
+  this.activePlayButton = function () {
+    var btnPath;
+
+    if (options.effectType == 'fade')
+      btnPath = document.querySelectorAll('.slide')[slideIndex - 1].querySelector('.playButton')?.firstChild.firstChild;
+    else {
+      if (options.slideDirection == 'vertical') btnPath = document.querySelectorAll('.transitionVerticalItem')[slideIndex - 1].querySelector('.playButton')?.firstChild.firstChild;
+      else btnPath = document.querySelectorAll('.transitionHorizontalItem')[slideIndex - 1].querySelector('.playButton')?.firstChild.firstChild;
+    }
+
+    if (btnPath) {
+      btnPath.setAttribute('fill', 'rgb(255, 0, 0)');
+      btnPath.style.fillOpacity = 1;
+    }
+  }
+
+  // inactive to play button
+  this.inactivePlayButton = function () {
+    var btnPath;
+
+    if (options.effectType == 'fade')
+      btnPath = document.querySelectorAll('.slide')[slideIndex - 1].querySelector('.playButton')?.firstChild.firstChild;
+    else {
+      if (options.slideDirection == 'vertical') btnPath = document.querySelectorAll('.transitionVerticalItem')[slideIndex - 1].querySelector('.playButton')?.firstChild.firstChild;
+      else btnPath = document.querySelectorAll('.transitionHorizontalItem')[slideIndex - 1].querySelector('.playButton')?.firstChild.firstChild;
+    }
+
+    if (btnPath) {
+      btnPath.setAttribute('fill', '#212121');
+      btnPath.style.fillOpacity = 0.8;
+    }
+  }
+
+  this.killTimer = function () {
+    clearInterval(this.autoPlayTimer);
   };
 
   if (typeof window.myWindowGlobalLibraryName === 'undefined') {
